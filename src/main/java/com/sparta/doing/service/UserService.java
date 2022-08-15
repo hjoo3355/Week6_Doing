@@ -1,9 +1,14 @@
 package com.sparta.doing.service;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.sparta.doing.dto.*;
+import com.sparta.doing.controller.request.LoginDto;
+import com.sparta.doing.controller.request.SignUpDto;
+import com.sparta.doing.controller.request.TokenRequestDto;
+import com.sparta.doing.controller.response.TokenDto;
+import com.sparta.doing.controller.response.UserResponseDto;
 import com.sparta.doing.entity.RefreshToken;
 import com.sparta.doing.exception.DuplicateUserInfoException;
+import com.sparta.doing.exception.ExceptionCode;
 import com.sparta.doing.exception.NoLoggedInUserException;
 import com.sparta.doing.exception.RefreshTokenNotFoundException;
 import com.sparta.doing.jwt.TokenProvider;
@@ -11,7 +16,11 @@ import com.sparta.doing.repository.RefreshTokenRepository;
 import com.sparta.doing.repository.UserRepository;
 import com.sparta.doing.util.SecurityUtil;
 import com.sparta.doing.util.UserFunction;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -22,6 +31,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -89,10 +99,29 @@ public class UserService {
     @Transactional
     public TokenDto renewToken(TokenRequestDto tokenRequestDto) {
         // 1. Refresh Token 검증
-        if (!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())) {
+        // if (!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())) {
+        //     throw new JWTVerificationException(
+        //             UserFunction.getClassName() +
+        //                     "Refresh Token 이 유효하지 않습니다. 다시 로그인해 주십시오.");
+        // }
+
+        // 1. Refresh Token 검증
+        try {
+            tokenProvider.validateToken(tokenRequestDto.getRefreshToken());
+        } catch (SecurityException | MalformedJwtException e) {
+            log.info(ExceptionCode.INVALID_SIGNATURE_TOKEN.getMessage());
             throw new JWTVerificationException(
-                    UserFunction.getClassName() +
-                            "Refresh Token 이 유효하지 않습니다. 다시 로그인해 주십시오.");
+                    ExceptionCode.INVALID_SIGNATURE_TOKEN.getMessage());
+        } catch (ExpiredJwtException e) {
+            log.info(ExceptionCode.EXPIRED_TOKEN.getMessage());
+            throw new JWTVerificationException(
+                    ExceptionCode.EXPIRED_TOKEN.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.info(ExceptionCode.UNSUPPORTED_TOKEN.getMessage());
+            throw new JWTVerificationException(ExceptionCode.UNSUPPORTED_TOKEN.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            log.info(ExceptionCode.WRONG_TOKEN.getMessage());
+            throw new JWTVerificationException(ExceptionCode.WRONG_TOKEN.getMessage(), e);
         }
 
         // 2. Access Token 에서 User ID(username) 가져오기

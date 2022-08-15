@@ -1,12 +1,14 @@
 package com.sparta.doing.jwt;
 
-import com.sparta.doing.dto.TokenDto;
-import io.jsonwebtoken.*;
+import com.sparta.doing.controller.response.TokenDto;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,13 +25,13 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class TokenProvider implements InitializingBean {
+public class TokenProvider {
 
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "bearer";
     private final long ACCESS_TOKEN_LIFETIME_IN_MS;
     private final long REFRESH_TOKEN_LIFETIME_IN_MS;
-    private final String secretKey;
+    // private final String secretKey;
     private Key key;
 
     // yml에 저장한 secret key와 토큰 지속시간 가져오기
@@ -37,18 +39,15 @@ public class TokenProvider implements InitializingBean {
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.access-token-lifetime-in-seconds}") long accessTokenLifetimeInSeconds,
             @Value("${jwt.refresh-token-lifetime-in-seconds}") long refreshTokenLifetimeInSeconds) {
-        this.secretKey = secretKey;
+        // this.secretKey = secretKey;
+
         // second -> millisecond로 변환
         this.ACCESS_TOKEN_LIFETIME_IN_MS =
                 accessTokenLifetimeInSeconds * 1000;
         this.REFRESH_TOKEN_LIFETIME_IN_MS =
                 refreshTokenLifetimeInSeconds * 1000;
-    }
 
-    // Bean 생성 직후 호출되는 메서드 (Initializer)
-    @Override
-    public void afterPropertiesSet() {
-        // 시크릿키를 디코드 해서 저장
+        // 시크릿키를 디코드하고
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         // 키의 자리수 검증 및 SecretKey 객체 생성
         this.key = Keys.hmacShaKeyFor(keyBytes);
@@ -116,20 +115,27 @@ public class TokenProvider implements InitializingBean {
 
     // 토큰 검증
     public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (io.jsonwebtoken.security.SecurityException |
-                 MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.");
-        } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 토큰입니다.");
-        } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 토큰입니다.");
-        } catch (IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.");
-        }
-        return false;
+        Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+        return true;
+        // try {
+        //     Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+        //     return true;
+        // } catch (SecurityException | MalformedJwtException e) {
+        //     log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+        //     throw new MalformedJwtException(e.getMessage(), e);
+        // } catch (ExpiredJwtException e) {
+        //     log.info("Expired JWT token, 만료된 JWT token 입니다.");
+        //     throw new ExpiredJwtException(
+        //             e.getHeader(), e.getClaims(), e.getMessage());
+        // } catch (UnsupportedJwtException e) {
+        //     log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
+        //     throw new UnsupportedJwtException(e.getMessage(), e);
+        // } catch (IllegalArgumentException e) {
+        //     log.info("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
+        //     throw new IllegalArgumentException(e.getMessage(), e);
+        // }
+
+        // return false;
     }
 
     private Claims parseClaims(String accessToken) {

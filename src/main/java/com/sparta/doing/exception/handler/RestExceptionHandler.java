@@ -3,6 +3,7 @@ package com.sparta.doing.exception.handler;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.sparta.doing.exception.DuplicateUserInfoException;
 import com.sparta.doing.exception.EntityNotFoundException;
+import com.sparta.doing.exception.NoLoggedInUserException;
 import com.sparta.doing.exception.RefreshTokenNotFoundException;
 import com.sparta.doing.exception.apierror.ApiError;
 import lombok.extern.slf4j.Slf4j;
@@ -179,7 +180,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(DuplicateUserInfoException.class)
     protected ResponseEntity<Object> handleDuplicateUser(DuplicateUserInfoException ex) {
-        ApiError apiError = new ApiError(OK);
+        ApiError apiError = new ApiError(BAD_REQUEST);
         apiError.setMessage(ex.getMessage());
         apiError.setDebugMessage(ex.getMessage());
         return buildResponseEntity(apiError);
@@ -193,7 +194,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(RefreshTokenNotFoundException.class)
     protected ResponseEntity<Object> handleRefreshTokenNotFound(RefreshTokenNotFoundException ex) {
-        ApiError apiError = new ApiError(OK);
+        ApiError apiError = new ApiError(NOT_FOUND);
         apiError.setMessage(ex.getMessage());
         apiError.setDebugMessage(ex.getMessage());
         return buildResponseEntity(apiError);
@@ -207,7 +208,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(JWTVerificationException.class)
     protected ResponseEntity<Object> handleJWTVerification(JWTVerificationException ex) {
-        ApiError apiError = new ApiError(OK);
+        ApiError apiError = new ApiError(UNAUTHORIZED);
         apiError.setMessage(ex.getMessage());
         apiError.setDebugMessage(ex.getMessage());
         return buildResponseEntity(apiError);
@@ -221,7 +222,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<Object> handleBadCredentials(BadCredentialsException ex) {
-        ApiError apiError = new ApiError(OK);
+        ApiError apiError = new ApiError(BAD_REQUEST);
         apiError.setMessage(ex.getMessage());
         apiError.setDebugMessage(ex.getMessage());
         return buildResponseEntity(apiError);
@@ -235,7 +236,21 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(UsernameNotFoundException.class)
     protected ResponseEntity<Object> handleUsernameNotFound(UsernameNotFoundException ex) {
-        ApiError apiError = new ApiError(OK);
+        ApiError apiError = new ApiError(NOT_FOUND);
+        apiError.setMessage(ex.getMessage());
+        apiError.setDebugMessage(ex.getMessage());
+        return buildResponseEntity(apiError);
+    }
+
+    /**
+     * 로그인 하지 않은 상태로 로그아웃 등을 시도했을 때 발생
+     *
+     * @param ex the Exception
+     * @return the ApiError object
+     */
+    @ExceptionHandler(NoLoggedInUserException.class)
+    protected ResponseEntity<Object> handleNoLoggedInUser(NoLoggedInUserException ex) {
+        ApiError apiError = new ApiError(UNAUTHORIZED);
         apiError.setMessage(ex.getMessage());
         apiError.setDebugMessage(ex.getMessage());
         return buildResponseEntity(apiError);

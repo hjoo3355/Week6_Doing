@@ -1,5 +1,9 @@
 package com.sparta.doing.jwt;
 
+import com.sparta.doing.exception.ExceptionCode;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -35,12 +39,34 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 2. validateToken으로 토큰 유효성 검사
         // 정상 토큰이면 해당 토큰으로 Authentication을 가져와서 SecurityContext에 저장
-        if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-            Authentication authentication = tokenProvider.getAuthentication(jwt);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.debug("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
-        } else {
-            log.debug("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
+        try {
+            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+                Authentication authentication = tokenProvider.getAuthentication(jwt);
+                log.debug("Authentication: " + authentication);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.debug("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
+            }
+            // else {
+            //     log.debug("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
+            // }
+        } catch (SecurityException | MalformedJwtException e) {
+            servletRequest.setAttribute("exception", ExceptionCode.INVALID_SIGNATURE_TOKEN.getCode());
+        } catch (ExpiredJwtException e) {
+            servletRequest.setAttribute("exception", ExceptionCode.EXPIRED_TOKEN.getCode());
+        } catch (UnsupportedJwtException e) {
+            servletRequest.setAttribute("exception", ExceptionCode.UNSUPPORTED_TOKEN.getCode());
+        } catch (IllegalArgumentException e) {
+            servletRequest.setAttribute("exception", ExceptionCode.WRONG_TOKEN.getCode());
+        } catch (Exception e) {
+            log.error("================================================");
+            log.error("JwtFilter - doFilterInternal() 오류발생");
+            log.error("token : {}", jwt);
+            log.error("Exception Message : {}", e.getMessage());
+            log.error("Exception StackTrace : {");
+            e.printStackTrace();
+            log.error("}");
+            log.error("================================================");
+            servletRequest.setAttribute("exception", ExceptionCode.UNKNOWN_ERROR.getCode());
         }
 
         filterChain.doFilter(servletRequest, servletResponse);
