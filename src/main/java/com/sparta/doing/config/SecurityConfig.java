@@ -2,10 +2,10 @@ package com.sparta.doing.config;
 
 import com.sparta.doing.jwt.JwtAccessDeniedHandler;
 import com.sparta.doing.jwt.JwtAuthenticationEntryPoint;
-import com.sparta.doing.jwt.JwtSecurityConfig;
 import com.sparta.doing.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,8 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+@Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final TokenProvider tokenProvider;
@@ -38,6 +39,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.cors();
+
         httpSecurity
                 // token을 사용하는 방식이기 때문에 csrf를 disable
                 .csrf().disable()
@@ -67,8 +70,8 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 //.antMatchers("/login").permitAll()
-                .antMatchers("/users/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
+                .antMatchers("/users/**").permitAll()
 
                 // 나머지는 전부 인증 필요
                 .anyRequest().authenticated()

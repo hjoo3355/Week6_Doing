@@ -1,7 +1,11 @@
 package com.sparta.doing.controller;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.sparta.doing.dto.*;
+import com.sparta.doing.controller.request.LoginDto;
+import com.sparta.doing.controller.request.SignUpDto;
+import com.sparta.doing.controller.request.TokenRequestDto;
+import com.sparta.doing.controller.response.TokenDto;
+import com.sparta.doing.controller.response.UserResponseDto;
 import com.sparta.doing.exception.RefreshTokenNotFoundException;
 import com.sparta.doing.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -51,18 +55,4 @@ public class UserController {
             throws JWTVerificationException, RefreshTokenNotFoundException {
         return ResponseEntity.ok(userService.renewToken(tokenRequestDto));
     }
-
-    // // 내 정보
-    // @GetMapping("/myInfo")
-    // public ResponseEntity<UserResponseDto> getMyUserInfo() {
-    //     return ResponseEntity.ok(userService.getMyUserInfoWithAuthorities());
-    // }
-
-    // // 특정 유저 정보
-    // @Secured("ROLE_ADMIN") // <- 접근 권한 샘플 코드
-    // @GetMapping("/{username}")
-    // public ResponseEntity<UserResponseDto> getUserInfo(@PathVariable String username) {
-    //     return ResponseEntity.ok(userService.getUserInfo(username));
-    // }
-
 }

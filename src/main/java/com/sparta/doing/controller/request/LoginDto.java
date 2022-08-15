@@ -1,4 +1,4 @@
-package com.sparta.doing.dto;
+package com.sparta.doing.controller.request;
 
 import com.sparta.doing.entity.UserEntity;
 import lombok.AccessLevel;
