@@ -77,6 +77,7 @@ public class UserService {
             authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
         } catch (AuthenticationException e) {
+            log.info("아이디, 혹은 비밀번호가 잘못되었습니다.");
             throw new BadCredentialsException("아이디, 혹은 비밀번호가 잘못되었습니다.");
         }
 
@@ -193,5 +194,17 @@ public class UserService {
                         () -> new UsernameNotFoundException(
                                 UserFunction.getClassName() +
                                         username + "은 올바른 아이디가 아닙니다."));
+    }
+
+    public boolean checkUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    public boolean checkEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    public boolean checkNickname(String nickname) {
+        return userRepository.existsByNickname(nickname);
     }
 }

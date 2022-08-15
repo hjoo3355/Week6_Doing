@@ -58,14 +58,14 @@ public class JwtFilter extends OncePerRequestFilter {
         } catch (IllegalArgumentException e) {
             servletRequest.setAttribute("exception", ExceptionCode.WRONG_TOKEN.getCode());
         } catch (Exception e) {
-            log.error("================================================");
-            log.error("JwtFilter - doFilterInternal() 오류발생");
-            log.error("token : {}", jwt);
-            log.error("Exception Message : {}", e.getMessage());
-            log.error("Exception StackTrace : {");
+            log.info("================================================");
+            log.info("JwtFilter - doFilterInternal() 오류발생");
+            log.info("token : {}", jwt);
+            log.info("Exception Message : {}", e.getMessage());
+            log.info("Exception StackTrace : {");
             e.printStackTrace();
-            log.error("}");
-            log.error("================================================");
+            log.info("}");
+            log.info("================================================");
             servletRequest.setAttribute("exception", ExceptionCode.UNKNOWN_ERROR.getCode());
         }
 

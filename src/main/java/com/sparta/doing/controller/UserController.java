@@ -1,16 +1,13 @@
 package com.sparta.doing.controller;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.sparta.doing.controller.request.LoginDto;
 import com.sparta.doing.controller.request.SignUpDto;
 import com.sparta.doing.controller.request.TokenRequestDto;
 import com.sparta.doing.controller.response.TokenDto;
 import com.sparta.doing.controller.response.UserResponseDto;
-import com.sparta.doing.exception.RefreshTokenNotFoundException;
 import com.sparta.doing.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,7 +30,7 @@ public class UserController {
 
     // 로그인 요청
     @PostMapping("/login")
-    public ResponseEntity<TokenDto> login(@RequestBody LoginDto loginDto) throws BadCredentialsException {
+    public ResponseEntity<TokenDto> login(@RequestBody LoginDto loginDto) {
         return ResponseEntity.ok(userService.login(loginDto));
     }
 
@@ -50,9 +47,26 @@ public class UserController {
     }
 
     // 토큰 재발급
-    @PostMapping("/renew")
-    public ResponseEntity<TokenDto> renewToken(@RequestBody TokenRequestDto tokenRequestDto)
-            throws JWTVerificationException, RefreshTokenNotFoundException {
+    @PostMapping("/auth/renew")
+    public ResponseEntity<TokenDto> renewToken(@RequestBody TokenRequestDto tokenRequestDto) {
         return ResponseEntity.ok(userService.renewToken(tokenRequestDto));
+    }
+
+    // username 중복 검사
+    @PostMapping("/dupcheck/username")
+    public ResponseEntity<Boolean> checkUsername(@RequestParam String username) {
+        return ResponseEntity.ok(userService.checkUsername(username));
+    }
+
+    // email 중복 검사
+    @PostMapping("/dupcheck/email")
+    public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
+        return ResponseEntity.ok(userService.checkEmail(email));
+    }
+
+    // nickname 중복 검사
+    @PostMapping("/dupcheck/nickname")
+    public ResponseEntity<Boolean> checkNickname(@RequestParam String nickname) {
+        return ResponseEntity.ok(userService.checkNickname(nickname));
     }
 }
