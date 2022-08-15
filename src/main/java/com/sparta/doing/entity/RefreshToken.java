@@ -1,5 +1,6 @@
 package com.sparta.doing.entity;
 
+import com.sparta.doing.domain.TimeStamp;
 import io.jsonwebtoken.lang.Assert;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import javax.persistence.Table;
 @Getter
 @Table(name = "refresh_token")
 @Entity
-public class RefreshToken extends BaseTimeEntity {
+public class RefreshToken extends TimeStamp {
 
     @Id
     @Column(name = "rt_key")

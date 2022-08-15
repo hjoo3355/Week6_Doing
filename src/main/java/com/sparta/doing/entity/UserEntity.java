@@ -1,6 +1,7 @@
 package com.sparta.doing.entity;
 
 import com.sparta.doing.controller.request.SignUpDto;
+import com.sparta.doing.domain.TimeStamp;
 import com.sparta.doing.util.UserFunction;
 import com.sun.istack.NotNull;
 import lombok.AccessLevel;
@@ -10,12 +11,18 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.util.Assert;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+        indexes = {
+                @Index(columnList = "email", unique = true)
+                // @Index(columnList = "createdAt"),
+                // @Index(columnList = "createdBy")
+        })
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 @Getter
-public class UserEntity extends BaseTimeEntity {
+public class UserEntity extends TimeStamp {
 
     @Id
     @Column(name = "user_id")
@@ -23,15 +30,15 @@ public class UserEntity extends BaseTimeEntity {
     Long id = null;
 
     @NotNull
-    @Column(unique = true)
+    @Column(unique = true, length = 50)
     String username;
     @NotNull
     String password;
     @NotNull
-    @Column(unique = true)
+    @Column(unique = true, length = 100)
     String email;
     @NotNull
-    @Column(unique = true)
+    @Column(unique = true, length = 50)
     String nickname;
 
     @NotNull
@@ -75,5 +82,18 @@ public class UserEntity extends BaseTimeEntity {
                 .nickname(signUpDto.getPassword())
                 .authority(signUpDto.getAuthority())
                 .build();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        UserEntity userEntity = new UserEntity();
+        if (this == object) return true;
+        if (!(userEntity.getClass().isInstance(object))) return false;
+        return username != null && username.equals(userEntity.getUsername());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username);
     }
 }

@@ -38,7 +38,7 @@ public class UserController {
     }
 
     // 회원 로그인 페이지
-    @GetMapping("/loginView")
+    @GetMapping("/loginview")
     public String login() {
         return "login";
     }
