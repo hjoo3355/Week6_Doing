@@ -1,6 +1,5 @@
 package com.sparta.doing.entity;
 
-import com.sparta.doing.domain.TimeStamp;
 import io.jsonwebtoken.lang.Assert;
 import lombok.Builder;
 import lombok.Getter;
