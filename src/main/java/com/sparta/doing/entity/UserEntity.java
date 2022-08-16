@@ -1,7 +1,6 @@
 package com.sparta.doing.entity;
 
 import com.sparta.doing.controller.request.SignUpDto;
-import com.sparta.doing.domain.TimeStamp;
 import com.sparta.doing.util.UserFunction;
 import com.sun.istack.NotNull;
 import lombok.AccessLevel;
@@ -11,10 +10,12 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.util.Assert;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "users",
+@Table(name = "userEntity",
         indexes = {
                 @Index(columnList = "email", unique = true)
                 // @Index(columnList = "createdAt"),
@@ -26,7 +27,7 @@ public class UserEntity extends TimeStamp {
 
     @Id
     @Column(name = "user_id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id = null;
 
     @NotNull
@@ -44,6 +45,9 @@ public class UserEntity extends TimeStamp {
     @NotNull
     @Enumerated(EnumType.STRING)
     Authority authority;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Board> boardList = new ArrayList<>();
 
     protected UserEntity() {
         this.username = null;
@@ -84,6 +88,8 @@ public class UserEntity extends TimeStamp {
                 .build();
     }
 
+    public void mapToBoard(Board board) { boardList.add(board); }
+
     @Override
     public boolean equals(Object object) {
         UserEntity userEntity = new UserEntity();
@@ -96,4 +102,5 @@ public class UserEntity extends TimeStamp {
     public int hashCode() {
         return Objects.hash(username);
     }
+
 }
