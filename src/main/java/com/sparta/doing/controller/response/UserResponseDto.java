@@ -4,43 +4,29 @@ import com.sparta.doing.entity.Authority;
 import com.sparta.doing.entity.UserEntity;
 import com.sparta.doing.util.UserFunction;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.jackson.Jacksonized;
 import org.springframework.util.Assert;
 
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+import javax.validation.constraints.NotBlank;
+
+@Jacksonized
 @Getter
+@Builder
+@AllArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 public class UserResponseDto {
-    @NonNull
+    @NotBlank
     String username;
-    @NonNull
+    @NotBlank
     String email;
-    @NonNull
+    @NotBlank
     String nickname;
-    @NonNull
+    @NotBlank
     Authority authority;
-
-    @Builder
-    public UserResponseDto(String username,
-                           String email,
-                           String nickname,
-                           Authority authority) {
-        Assert.hasText(username,
-                UserFunction.getClassName() + "username이 비어있습니다.");
-        Assert.hasText(email,
-                UserFunction.getClassName() + "email이 비어있습니다.");
-        Assert.hasText(nickname,
-                UserFunction.getClassName() + "nickname이 비어있습니다.");
-        Assert.hasText(authority.toString(),
-                UserFunction.getClassName() + "authority가 비어있습니다.");
-
-        this.username = username;
-        this.email = email;
-        this.nickname = nickname;
-        this.authority = authority;
-    }
 
     public static UserResponseDto of(UserEntity userEntity) {
         Assert.notNull(userEntity,

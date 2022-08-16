@@ -1,10 +1,6 @@
 package com.sparta.doing.exception.handler;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.sparta.doing.exception.DuplicateUserInfoException;
-import com.sparta.doing.exception.EntityNotFoundException;
-import com.sparta.doing.exception.NoLoggedInUserException;
-import com.sparta.doing.exception.RefreshTokenNotFoundException;
+import com.sparta.doing.exception.*;
 import com.sparta.doing.exception.apierror.ApiError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
@@ -206,8 +202,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      * @param ex the Exception
      * @return the ApiError object
      */
-    @ExceptionHandler(JWTVerificationException.class)
-    protected ResponseEntity<Object> handleJWTVerification(JWTVerificationException ex) {
+    @ExceptionHandler(InvalidJWTException.class)
+    protected ResponseEntity<Object> handleJWTVerification(InvalidJWTException ex) {
         ApiError apiError = new ApiError(UNAUTHORIZED);
         apiError.setMessage(ex.getMessage());
         apiError.setDebugMessage(ex.getMessage());

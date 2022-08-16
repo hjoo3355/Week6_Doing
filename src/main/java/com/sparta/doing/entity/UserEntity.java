@@ -1,5 +1,6 @@
 package com.sparta.doing.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sparta.doing.controller.request.SignUpDto;
 import com.sparta.doing.domain.TimeStamp;
 import com.sparta.doing.util.UserFunction;
@@ -8,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
 import javax.persistence.*;
@@ -20,6 +22,8 @@ import java.util.Objects;
                 // @Index(columnList = "createdAt"),
                 // @Index(columnList = "createdBy")
         })
+// @JsonPropertyOrder({"id", "username", "password", "email", "nickname",
+//         "authority", "createdAt", "modifiedAt"})
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 @Getter
 public class UserEntity extends TimeStamp {
@@ -33,6 +37,7 @@ public class UserEntity extends TimeStamp {
     @Column(unique = true, length = 50)
     String username;
     @NotNull
+    @JsonIgnore
     String password;
     @NotNull
     @Column(unique = true, length = 100)
@@ -40,7 +45,6 @@ public class UserEntity extends TimeStamp {
     @NotNull
     @Column(unique = true, length = 50)
     String nickname;
-
     @NotNull
     @Enumerated(EnumType.STRING)
     Authority authority;
@@ -55,11 +59,11 @@ public class UserEntity extends TimeStamp {
 
     @Builder(builderClassName = "buildDefaultUser",
             builderMethodName = "buildDefaultUser")
-    public UserEntity(String username,
-                      String password,
-                      String email,
-                      String nickname,
-                      Authority authority) {
+    protected UserEntity(String username,
+                         String password,
+                         String email,
+                         String nickname,
+                         Authority authority) {
         Assert.hasText(username, UserFunction.getClassName() +
                 "username이 비어있습니다.");
         Assert.hasText(password, UserFunction.getClassName() + "password가 비어있습니다.");
@@ -74,13 +78,14 @@ public class UserEntity extends TimeStamp {
         this.authority = authority;
     }
 
-    public UserEntity of(SignUpDto signUpDto) {
+    public static UserEntity of(SignUpDto signUpDto, PasswordEncoder passwordEncoder) {
         return UserEntity.buildDefaultUser()
                 .username(signUpDto.getUsername())
-                .password(signUpDto.getPassword())
+                .password(passwordEncoder.encode(signUpDto.getPassword()))
                 .email(signUpDto.getEmail())
-                .nickname(signUpDto.getPassword())
-                .authority(signUpDto.getAuthority())
+                .nickname(signUpDto.getNickname())
+                .authority(signUpDto.getAuthority() == null ?
+                        Authority.ROLE_USER : signUpDto.getAuthority())
                 .build();
     }
 

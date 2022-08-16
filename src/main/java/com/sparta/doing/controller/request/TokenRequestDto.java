@@ -1,21 +1,22 @@
 package com.sparta.doing.controller.request;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.jackson.Jacksonized;
 
+import javax.validation.constraints.NotBlank;
+
+@Jacksonized
 @Getter
+@Builder
+@AllArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 public class TokenRequestDto {
-    private final String accessToken;
-    private final String refreshToken;
-
-    private TokenRequestDto() {
-        this.accessToken = null;
-        this.refreshToken = null;
-    }
-
-    @Builder
-    public TokenRequestDto(String accessToken, String refreshToken) {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-    }
+    @NotBlank
+    String accessToken;
+    @NotBlank
+    String refreshToken;
 }

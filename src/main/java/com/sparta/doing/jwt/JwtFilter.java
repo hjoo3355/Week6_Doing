@@ -32,6 +32,14 @@ public class JwtFilter extends OncePerRequestFilter {
                                  HttpServletResponse servletResponse,
                                  FilterChain filterChain)
             throws IOException, ServletException {
+
+        servletResponse.setHeader("Access-Control-Allow-Origin", "*");
+        servletResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
+        servletResponse.setHeader("Access-Control-Max-Age", "3600");
+        servletResponse.setHeader("Access-Control-Allow-Headers",
+                "Content-Type, Accept, X-Requested-With, remember-me, Origin,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization");
+        servletResponse.setHeader("Access-Control-Allow-Credentials", "true");
+
         // 1. Request Header에서 토큰을 꺼낸다
         String jwt = resolveToken(servletRequest);
         // 요청이 들어온 URI
