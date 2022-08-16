@@ -1,6 +1,6 @@
 package com.sparta.doing.entity;
 
-import com.sparta.doing.domain.TimeStamp;
+import com.sparta.doing.entity.TimeStamp;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.jackson.Jacksonized;

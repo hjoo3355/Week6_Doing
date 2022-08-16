@@ -1,4 +1,4 @@
-package com.sparta.doing.domain;
+package com.sparta.doing.entity;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -21,18 +21,10 @@ public abstract class TimeStamp {
     @Column(nullable = false, updatable = false)
     private String createdAt;
 
-    // @CreatedBy
-    // @Column(nullable = false, updatable = false, length = 50)
-    // private String createdBy;
-
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @LastModifiedDate
     @Column(nullable = false)
     private String modifiedAt;
-
-    // @LastModifiedBy
-    // @Column(nullable = false, length = 50)
-    // private String modifiedBy;
 
     // 날짜 포맷 변경
     // 엔티티 insert 이전에 실행
