@@ -45,7 +45,7 @@ public class SecurityConfig /*implements WebMvcConfigurer*/ {
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
-        
+
         configuration.addExposedHeader("accessToken");
         configuration.addExposedHeader("Set-Cookie");
 
@@ -96,6 +96,12 @@ public class SecurityConfig /*implements WebMvcConfigurer*/ {
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+                // // 로그인 시도 할 때 DB에서 조회해 검증할 값(테스트 필요함)
+                // .and()
+                // .formLogin()
+                // .usernameParameter("loginId")
+                // .passwordParameter("password")
 
                 // 로그인, 회원가입 등 토큰이 없을 때 요청이 들어오는 API는 permitAll
                 .and()
