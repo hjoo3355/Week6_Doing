@@ -1,11 +1,9 @@
 package com.sparta.doing.entity;
 
-import com.sparta.doing.controller.request.SignUpDto;
+import com.sparta.doing.controller.requestdto.SignUpDto;
 import com.sparta.doing.util.UserFunction;
 import com.sun.istack.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.util.Assert;
 
@@ -14,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static lombok.AccessLevel.PROTECTED;
+
 @Entity
 @Table(name = "userEntity",
         indexes = {
@@ -21,7 +21,7 @@ import java.util.Objects;
                 // @Index(columnList = "createdAt"),
                 // @Index(columnList = "createdBy")
         })
-@FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
+//@FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 @Getter
 public class UserEntity extends TimeStamp {
 
@@ -49,13 +49,13 @@ public class UserEntity extends TimeStamp {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boardList = new ArrayList<>();
 
-    protected UserEntity() {
-        this.username = null;
-        this.password = null;
-        this.email = null;
-        this.nickname = null;
-        this.authority = null;
-    }
+//    protected UserEntity() {
+//        this.username = null;
+//        this.password = null;
+//        this.email = null;
+//        this.nickname = null;
+//        this.authority = null;
+//    }
 
     @Builder(builderClassName = "buildDefaultUser",
             builderMethodName = "buildDefaultUser")
@@ -78,6 +78,12 @@ public class UserEntity extends TimeStamp {
         this.authority = authority;
     }
 
+    protected UserEntity() {}
+
+    public UserEntity(Long id, String username, String password, String email, String nickname, Authority authority) {
+        super();
+    }
+
     public UserEntity of(SignUpDto signUpDto) {
         return UserEntity.buildDefaultUser()
                 .username(signUpDto.getUsername())
@@ -86,6 +92,10 @@ public class UserEntity extends TimeStamp {
                 .nickname(signUpDto.getPassword())
                 .authority(signUpDto.getAuthority())
                 .build();
+    }
+
+    public static UserEntity of(Long id, String username, String password, String email, String nickname, Authority authority) {
+        return new UserEntity(id, username, password, email, nickname, authority);
     }
 
     public void mapToBoard(Board board) { boardList.add(board); }
