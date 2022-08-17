@@ -1,6 +1,6 @@
 package com.sparta.doing.jwt;
 
-import com.sparta.doing.controller.response.TokenDto;
+import com.sparta.doing.controller.responsedto.TokenDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
