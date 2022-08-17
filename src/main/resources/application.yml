@@ -1,40 +1,42 @@
+debug: false
+
+logging:
+  level:
+    com.sparta.doing: debug
+    org.springframework.web.servlet: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+
 spring:
+  datasource:
+    url: jdbc:mysql://<host_name>:3306/<database_name>
+    #    url: jdbc:h2:~/h2db/local
+    username: <user_id>
+    password: <password>
+    driver-class-name: com.mysql.cj.jdbc.Driver
   h2:
     console:
       enabled: true
-  datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb
-    #    url: jdbc:h2:~/h2db/local
-    username: sa
-    password:
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: create-drop
+    open-in-view: false
+    defer-datasource-initialization: true
+    hibernate.ddl-auto: update
+    show-sql: true
+    #    database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
         format_sql: true
         show_sql: true
         use_sql_comments: true
-    defer-datasource-initialization: true
-  mvc:
-    throw-exception-if-no-handler-found: true
-  web:
-    resources:
-      add-mappings: false
-logging:
-  level:
-    com.tutorial: debug
+        check_nullability: true
 
-# HS512 알고리즘을 사용할 것이기 때문에 512bit, 즉 64byte 이상의 secret key를 사용해야 한다.
-# Secret 값은 특정 문자열을 Base64 로 인코딩한 값 사용
-# 아래 값을 Base64로 인코딩함
-# spring-boot-security-jwt-innovationcamp-week6-doing-team6-chanho-secret-key
 jwt:
-  secret: c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LWlubm92YXRpb25jYW1wLXdlZWs2LWRvaW5nLXRlYW02LWNoYW5oby1zZWNyZXQta2V5
   header: Authorization
-  # 액세스 토큰 유효기간 60초
-  access-token-lifetime-in-seconds: 60
-  # 리프레쉬 토큰 유효기간 1시간
-  refresh-token-lifetime-in-seconds: 3600
+  #HS512 알고리즘 사용
+  #64byte 이상의 secret key 필요
+  #https://www.convertstring.com/ko/EncodeDecode/Base64Encode
+  #text 'innovation-camp-in-dongjak-mini-project-innovation-camp-in-dongjak-mini-project-secret'을 base64로 인코딩
+  secret: aW5ub3ZhdGlvbi1jYW1wLWluLWRvbmdqYWstbWluaS1wcm9qZWN0LWlubm92YXRpb24tY2FtcC1pbi1kb25namFrLW1pbmktcHJvamVjdC1zZWNyZXQK
+  # 액세스 토큰 유효기간 2시간
+  access-token-lifetime-in-seconds: 7200
+  # 리프레쉬 토큰 유효기간 3시간
+  refresh-token-lifetime-in-seconds: 10800
