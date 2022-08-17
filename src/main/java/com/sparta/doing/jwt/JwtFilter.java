@@ -32,6 +32,14 @@ public class JwtFilter extends OncePerRequestFilter {
                                  HttpServletResponse servletResponse,
                                  FilterChain filterChain)
             throws IOException, ServletException {
+
+        servletResponse.setHeader("Access-Control-Allow-Origin", "*");
+        servletResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
+        servletResponse.setHeader("Access-Control-Max-Age", "3600");
+        servletResponse.setHeader("Access-Control-Allow-Headers",
+                "Content-Type, Accept, X-Requested-With, remember-me, Origin,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization");
+        servletResponse.setHeader("Access-Control-Allow-Credentials", "true");
+
         // 1. Request Header에서 토큰을 꺼낸다
         String jwt = resolveToken(servletRequest);
         // 요청이 들어온 URI
@@ -58,14 +66,14 @@ public class JwtFilter extends OncePerRequestFilter {
         } catch (IllegalArgumentException e) {
             servletRequest.setAttribute("exception", ExceptionCode.WRONG_TOKEN.getCode());
         } catch (Exception e) {
-            log.error("================================================");
-            log.error("JwtFilter - doFilterInternal() 오류발생");
-            log.error("token : {}", jwt);
-            log.error("Exception Message : {}", e.getMessage());
-            log.error("Exception StackTrace : {");
+            log.info("================================================");
+            log.info("JwtFilter - doFilterInternal() 오류발생");
+            log.info("token : {}", jwt);
+            log.info("Exception Message : {}", e.getMessage());
+            log.info("Exception StackTrace : {");
             e.printStackTrace();
-            log.error("}");
-            log.error("================================================");
+            log.info("}");
+            log.info("================================================");
             servletRequest.setAttribute("exception", ExceptionCode.UNKNOWN_ERROR.getCode());
         }
 

@@ -1,39 +1,38 @@
 package com.sparta.doing.entity;
 
-import io.jsonwebtoken.lang.Assert;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.With;
+import com.sparta.doing.entity.TimeStamp;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.jackson.Jacksonized;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 
+@Jacksonized
 @Getter
+@Builder
+@AllArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 @Table(name = "refresh_token")
 @Entity
 public class RefreshToken extends TimeStamp {
 
     @Id
     @Column(name = "rt_key")
+    @NotBlank
     // username이 들어감
-    private final String key;
+    String key;
 
     @With
     @Column(name = "rt_value")
-    private final String value;
+    @NotBlank
+    String value;
 
     protected RefreshToken() {
         this.key = null;
         this.value = null;
-    }
-
-    @Builder
-    public RefreshToken(String key, String value) {
-        Assert.hasText(key, RefreshToken.class.getName() + ".key가 비어있습니다.");
-        Assert.hasText(value, RefreshToken.class.getName() + ".value가 비어있습니다.");
-        this.key = key;
-        this.value = value;
     }
 }

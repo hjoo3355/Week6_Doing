@@ -13,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
@@ -21,7 +24,7 @@ public class UserController {
 
     // 회원가입 요청
     @PostMapping("/signup")
-    public ResponseEntity<UserResponseDto> signup(@RequestBody SignUpDto signUpDto) {
+    public ResponseEntity<UserResponseDto> signup(@RequestBody @Valid SignUpDto signUpDto) {
         return ResponseEntity.ok(userService.signup(signUpDto));
     }
 
@@ -47,7 +50,7 @@ public class UserController {
 
     // 로그인 요청
     @PostMapping("/login")
-    public ResponseEntity<TokenDto> login(@RequestBody LoginDto loginDto) throws BadCredentialsException {
+    public ResponseEntity<TokenDto> login(@RequestBody @Valid LoginDto loginDto) {
         return ResponseEntity.ok(userService.login(loginDto));
     }
 
@@ -108,9 +111,26 @@ public class UserController {
 //}
 
     // 토큰 재발급
-    @PostMapping("/renew")
-    public ResponseEntity<TokenDto> renewToken(@RequestBody TokenRequestDto tokenRequestDto)
-            throws JWTVerificationException, RefreshTokenNotFoundException {
+    @PostMapping("/auth/renew")
+    public ResponseEntity<TokenDto> renewToken(@RequestBody TokenRequestDto tokenRequestDto) {
         return ResponseEntity.ok(userService.renewToken(tokenRequestDto));
+    }
+
+    // username 중복 검사
+    @PostMapping("/dupcheck/username/{username}")
+    public ResponseEntity<Boolean> checkUsername(@PathVariable String username) {
+        return ResponseEntity.ok(userService.checkUsername(username));
+    }
+
+    // email 중복 검사
+    @PostMapping("/dupcheck/email/{email}")
+    public ResponseEntity<Boolean> checkEmail(@PathVariable String email) {
+        return ResponseEntity.ok(userService.checkEmail(email));
+    }
+
+    // nickname 중복 검사
+    @PostMapping("/dupcheck/nickname/{nickname}")
+    public ResponseEntity<Boolean> checkNickname(@PathVariable String nickname) {
+        return ResponseEntity.ok(userService.checkNickname(nickname));
     }
 }

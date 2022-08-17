@@ -32,7 +32,15 @@ public class TokenProvider {
     private final long ACCESS_TOKEN_LIFETIME_IN_MS;
     private final long REFRESH_TOKEN_LIFETIME_IN_MS;
     // private final String secretKey;
-    private Key key;
+    private final Key key;
+
+    public long getACCESS_TOKEN_LIFETIME_IN_MS() {
+        return ACCESS_TOKEN_LIFETIME_IN_MS;
+    }
+
+    public long getREFRESH_TOKEN_LIFETIME_IN_MS() {
+        return REFRESH_TOKEN_LIFETIME_IN_MS;
+    }
 
     // yml에 저장한 secret key와 토큰 지속시간 가져오기
     public TokenProvider(
@@ -87,9 +95,9 @@ public class TokenProvider {
         return TokenDto.builder()
                 .grantType(BEARER_TYPE)
                 .accessToken(accessToken)
-                .accessTokenExpiresIn(accessTokenExpiration.getTime())
+                .accessTokenLifetime(this.ACCESS_TOKEN_LIFETIME_IN_MS)
                 .refreshToken(refreshToken)
-                .refreshTokenExpiresIn(refreshTokenExpiration.getTime())
+                .refreshTokenLifetime(this.REFRESH_TOKEN_LIFETIME_IN_MS)
                 .build();
     }
 

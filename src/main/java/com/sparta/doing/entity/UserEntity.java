@@ -1,10 +1,12 @@
 package com.sparta.doing.entity;
 
 import com.sparta.doing.controller.requestdto.SignUpDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sparta.doing.util.UserFunction;
 import com.sun.istack.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
 import javax.persistence.*;
@@ -21,7 +23,9 @@ import static lombok.AccessLevel.PROTECTED;
                 // @Index(columnList = "createdAt"),
                 // @Index(columnList = "createdBy")
         })
-//@FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
+// @JsonPropertyOrder({"id", "username", "password", "email", "nickname",
+//         "authority", "createdAt", "modifiedAt"})
+@FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 @Getter
 public class UserEntity extends TimeStamp {
 
@@ -34,6 +38,7 @@ public class UserEntity extends TimeStamp {
     @Column(unique = true, length = 50)
     String username;
     @NotNull
+    @JsonIgnore
     String password;
     @NotNull
     @Column(unique = true, length = 100)
@@ -41,7 +46,6 @@ public class UserEntity extends TimeStamp {
     @NotNull
     @Column(unique = true, length = 50)
     String nickname;
-
     @NotNull
     @Enumerated(EnumType.STRING)
     Authority authority;
@@ -49,21 +53,21 @@ public class UserEntity extends TimeStamp {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boardList = new ArrayList<>();
 
-//    protected UserEntity() {
-//        this.username = null;
-//        this.password = null;
-//        this.email = null;
-//        this.nickname = null;
-//        this.authority = null;
-//    }
+    protected UserEntity() {
+        this.username = null;
+        this.password = null;
+        this.email = null;
+        this.nickname = null;
+        this.authority = null;
+    }
 
     @Builder(builderClassName = "buildDefaultUser",
             builderMethodName = "buildDefaultUser")
-    public UserEntity(String username,
-                      String password,
-                      String email,
-                      String nickname,
-                      Authority authority) {
+    protected UserEntity(String username,
+                         String password,
+                         String email,
+                         String nickname,
+                         Authority authority) {
         Assert.hasText(username, UserFunction.getClassName() +
                 "username이 비어있습니다.");
         Assert.hasText(password, UserFunction.getClassName() + "password가 비어있습니다.");
@@ -78,25 +82,20 @@ public class UserEntity extends TimeStamp {
         this.authority = authority;
     }
 
-    protected UserEntity() {}
-
-    public UserEntity(Long id, String username, String password, String email, String nickname, Authority authority) {
-        super();
-    }
-
-    public UserEntity of(SignUpDto signUpDto) {
+    public static UserEntity of(SignUpDto signUpDto, PasswordEncoder passwordEncoder) {
         return UserEntity.buildDefaultUser()
                 .username(signUpDto.getUsername())
-                .password(signUpDto.getPassword())
+                .password(passwordEncoder.encode(signUpDto.getPassword()))
                 .email(signUpDto.getEmail())
-                .nickname(signUpDto.getPassword())
-                .authority(signUpDto.getAuthority())
+                .nickname(signUpDto.getNickname())
+                .authority(signUpDto.getAuthority() == null ?
+                        Authority.ROLE_USER : signUpDto.getAuthority())
                 .build();
     }
 
-    public static UserEntity of(Long id, String username, String password, String email, String nickname, Authority authority) {
-        return new UserEntity(id, username, password, email, nickname, authority);
-    }
+//    public static UserEntity of(Long id, String username, String password, String email, String nickname, Authority authority) {
+//        return new UserEntity(id, username, password, email, nickname, authority);
+//    }
 
     public void mapToBoard(Board board) { boardList.add(board); }
 
@@ -112,5 +111,4 @@ public class UserEntity extends TimeStamp {
     public int hashCode() {
         return Objects.hash(username);
     }
-
 }
