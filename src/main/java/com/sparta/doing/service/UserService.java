@@ -1,11 +1,11 @@
 package com.sparta.doing.service;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.sparta.doing.controller.request.LoginDto;
-import com.sparta.doing.controller.request.SignUpDto;
-import com.sparta.doing.controller.request.TokenRequestDto;
-import com.sparta.doing.controller.response.TokenDto;
-import com.sparta.doing.controller.response.UserResponseDto;
+import com.sparta.doing.controller.requestdto.LoginDto;
+import com.sparta.doing.controller.requestdto.SignUpDto;
+import com.sparta.doing.controller.requestdto.TokenRequestDto;
+import com.sparta.doing.controller.responsedto.TokenDto;
+import com.sparta.doing.controller.responsedto.UserResponseDto;
 import com.sparta.doing.entity.RefreshToken;
 import com.sparta.doing.exception.DuplicateUserInfoException;
 import com.sparta.doing.exception.ExceptionCode;
