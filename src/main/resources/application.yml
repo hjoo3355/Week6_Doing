@@ -14,7 +14,6 @@ spring:
         web-allow-others: true
   datasource:
     url: jdbc:mysql://<host_name>:3306/<database_name>
-    #    url: jdbc:h2:~/h2db/local
     username: <user_id>
     password: <password>
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -22,7 +21,6 @@ spring:
     open-in-view: false
     hibernate.ddl-auto: update
     show-sql: true
-    #    database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
         format_sql: true
@@ -43,6 +41,7 @@ spring:
 jwt:
   secret: c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LWlubm92YXRpb25jYW1wLXdlZWs2LWRvaW5nLXRlYW02LWNoYW5oby1zZWNyZXQta2V5
   header: Authorization
+  # 리프레쉬 토큰 유효기간 2시간
   access-token-lifetime-in-seconds: 7200
   # 리프레쉬 토큰 유효기간 3시간
   refresh-token-lifetime-in-seconds: 10800
