@@ -1,6 +1,6 @@
 package com.sparta.doing.jwt;
 
-import com.sparta.doing.controller.response.TokenDto;
+import com.sparta.doing.controller.responsedto.TokenDto;
 import com.sparta.doing.security.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -100,6 +100,16 @@ public class TokenProvider {
                 .accessTokenLifetime(this.ACCESS_TOKEN_LIFETIME_IN_MS)
                 .refreshToken(refreshToken)
                 .refreshTokenLifetime(this.REFRESH_TOKEN_LIFETIME_IN_MS)
+                .build();
+    }
+
+    public TokenDto createEmptyTokenDto() {
+        return TokenDto.builder()
+                .grantType(BEARER_TYPE)
+                .accessToken("logout")
+                .accessTokenLifetime(1L)
+                .refreshToken("logout")
+                .refreshTokenLifetime(1L)
                 .build();
     }
 

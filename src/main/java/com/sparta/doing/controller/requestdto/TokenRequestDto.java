@@ -1,4 +1,4 @@
-package com.sparta.doing.controller.request;
+package com.sparta.doing.controller.requestdto;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -14,9 +14,9 @@ import javax.validation.constraints.NotBlank;
 @Builder
 @AllArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
-public class LoginDto {
+public class TokenRequestDto {
     @NotBlank
-    String username;
+    String accessToken;
     @NotBlank
-    String password;
+    String refreshToken;
 }

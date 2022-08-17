@@ -1,7 +1,7 @@
 package com.sparta.doing.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sparta.doing.controller.request.SignUpDto;
+import com.sparta.doing.controller.requestdto.SignUpDto;
 import com.sparta.doing.util.UserFunction;
 import com.sun.istack.NotNull;
 import lombok.AccessLevel;

@@ -1,10 +1,10 @@
 package com.sparta.doing.service;
 
-import com.sparta.doing.controller.request.LoginDto;
-import com.sparta.doing.controller.request.SignUpDto;
-import com.sparta.doing.controller.request.TokenRequestDto;
-import com.sparta.doing.controller.response.TokenDto;
-import com.sparta.doing.controller.response.UserResponseDto;
+import com.sparta.doing.controller.requestdto.LoginDto;
+import com.sparta.doing.controller.requestdto.SignUpDto;
+import com.sparta.doing.controller.requestdto.TokenRequestDto;
+import com.sparta.doing.controller.responsedto.TokenDto;
+import com.sparta.doing.controller.responsedto.UserResponseDto;
 import com.sparta.doing.entity.RefreshToken;
 import com.sparta.doing.entity.UserEntity;
 import com.sparta.doing.exception.DuplicateUserInfoException;
@@ -72,7 +72,7 @@ public class UserService {
 
         // 2. 실제로 검증 (사용자 비밀번호 체크) 이 이루어지는 부분
         //    authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
-        Authentication authentication = null;
+        Authentication authentication;
         try {
             authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         } catch (AuthenticationException e) {
@@ -159,7 +159,7 @@ public class UserService {
     }
 
     @Transactional
-    public String logout() {
+    public TokenDto logout() {
         var userId = SecurityUtil.getCurrentUserIdByLong();
         var token = refreshTokenRepository.findById(userId)
                 .orElseThrow(() -> new RefreshTokenNotFoundException(
@@ -168,7 +168,7 @@ public class UserService {
 
         refreshTokenRepository.delete(token);
 
-        return "로그아웃 성공.";
+        return tokenProvider.createEmptyTokenDto();
     }
 
     // 현재 SecurityContext에 있는 유저 정보 가져오기
