@@ -108,6 +108,7 @@ public class SecurityConfig /*implements WebMvcConfigurer*/ {
                 .authorizeRequests()
                 //.antMatchers("/login").permitAll()
                 //.antMatchers("/h2-console/**").permitAll()
+                // .antMatchers("/users/auth/**").hasAnyAuthority()
                 .antMatchers("/users/**").permitAll()
 
                 // 나머지는 전부 인증 필요

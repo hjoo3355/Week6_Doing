@@ -122,6 +122,14 @@ public class UserService {
         } catch (IllegalArgumentException e) {
             log.info(ExceptionCode.WRONG_TOKEN.getMessage());
             throw new InvalidJWTException(ExceptionCode.WRONG_TOKEN.getMessage());
+        } catch (Exception e) {
+            log.info("{");
+            log.info("Exception Message : {}", e.getMessage());
+            log.info("Exception StackTrace : {");
+            e.printStackTrace();
+            log.info("}");
+            log.info("================================================");
+            throw new InvalidJWTException(ExceptionCode.UNKNOWN_ERROR.getMessage());
         }
 
         // 2. Access Token 에서 userId(PK) 가져오기
@@ -138,7 +146,7 @@ public class UserService {
             throw new InvalidJWTException("토큰의 유저 정보가 일치하지 않습니다.");
         }
 
-        // 5. UserEntity의 pk값(userId)을 토큰의 클레임에 넣고 토큰 생성
+        // 5. Access Token 에서 가져온 userId(PK)를 다시 새로운 토큰의 클레임에 넣고 토큰 생성
         TokenDto tokenDto = tokenProvider.createTokenDto(authentication, userId);
 
         // 6. db의 리프레쉬 토큰 정보 업데이트
