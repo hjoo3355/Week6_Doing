@@ -1,4 +1,4 @@
-package com.sparta.doing.controller.response;
+package com.sparta.doing.controller.responsedto;
 
 import com.sparta.doing.entity.Authority;
 import com.sparta.doing.entity.UserEntity;
