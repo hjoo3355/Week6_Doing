@@ -17,8 +17,8 @@ public class BoardService {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
 
-    public BoardDto createBoard(BoardDto boardDto, String username) {
-        UserEntity foundUserEntity = userRepository.findByUsername(username)
+    public BoardDto createBoard(BoardDto boardDto, Long userId) {
+        UserEntity foundUserEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("게시판 작성 권한이 없습니다."));
 
         Board createdBoard = Board.builder()
@@ -57,7 +57,7 @@ public class BoardService {
     public void updateBoard(Long boardId, BoardDto boardDto, String username) {
         Board foundBoardToUpdate = boardRepository.findById(boardId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글은 존재하지 않습니다."));
-        if(foundBoardToUpdate.getUserEntity().getUsername().equals(username)){
+        if (foundBoardToUpdate.getUserEntity().getUsername().equals(username)) {
             foundBoardToUpdate.update(boardDto);
         }
     }
@@ -65,7 +65,7 @@ public class BoardService {
     public void deleteBoard(Long boardId, String username) {
         Board foundBoardToDelete = boardRepository.findById(boardId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글은 존재하지 않습니다."));
-        if(foundBoardToDelete.getUserEntity().getUsername().equals(username)){
+        if (foundBoardToDelete.getUserEntity().getUsername().equals(username)) {
             boardRepository.delete(foundBoardToDelete);
         }
     }

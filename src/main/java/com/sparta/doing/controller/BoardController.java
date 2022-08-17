@@ -2,6 +2,7 @@ package com.sparta.doing.controller;
 
 import com.sparta.doing.controller.request.BoardDto;
 import com.sparta.doing.service.BoardService;
+import com.sparta.doing.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,14 +16,17 @@ public class BoardController {
 
     // 1개 게시판 내용 작성 후 BoardController의 @GetMapping으로 이동한 다음, index.html로 이동한다.
     @PostMapping
-    public String createBoard(@RequestBody BoardDto boardDto,
-                                                @AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        if (username.isEmpty()) {
-             return "login";
-        }
+    public String createBoard(@RequestBody BoardDto boardDto) {
+        // @AuthenticationPrincipal UserDetails userDetails) {
+        // String username = userDetails.getUsername();
+        // if (username.isEmpty()) {
+        //     return "login";
+        // }
 
-        this.boardService.createBoard(boardDto, username);
+        var userId = SecurityUtil.getCurrentUserIdByLong();
+
+        this.boardService.createBoard(boardDto, userId);
+        
         return "redirect:/boards";
     }
 
@@ -37,8 +41,8 @@ public class BoardController {
     // 1개 게시판 내용 수정 Url로 이동 시 인증되지 않은 유저는 login.html로 이동한다.
     @PutMapping("/{boardId}")
     public String updateBoard(@PathVariable(name = "boardId") Long boardId,
-                                                @RequestBody BoardDto boardDto,
-                                                @AuthenticationPrincipal UserDetails userDetails) {
+                              @RequestBody BoardDto boardDto,
+                              @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         if (username.isEmpty()) {
             return "login";
@@ -52,7 +56,7 @@ public class BoardController {
     // 1개 게시판 내용 수정 Url로 이동 시 인증되지 않은 유저는 login.html로 이동한다.
     @DeleteMapping("/{boardId}")
     public String deleteBoard(@PathVariable(name = "boardId") Long boardId,
-                                                @AuthenticationPrincipal UserDetails userDetails) {
+                              @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         if (username.isEmpty()) {
             return "login";
