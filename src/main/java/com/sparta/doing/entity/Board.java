@@ -1,6 +1,6 @@
 package com.sparta.doing.entity;
 
-import com.sparta.doing.controller.request.BoardDto;
+import com.sparta.doing.controller.requestdto.BoardRequestDto;
 import lombok.*;
 
 import javax.persistence.*;
@@ -37,19 +37,36 @@ public class Board extends TimeStamp{
     private String boardHashtag; // 게시판 해시태그
 
 //    private Long boardLikeCount; // 게시판 좋아요 갯수
-//    private Long countBoardVisit; // 게시판 방문자 수
 //    private Long countPost; // 게시판에 딸려있는 게시글 수
+
+    @Column(nullable = false)
+    private int countBoardVisit = 0; // 게시판 방문자 수
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "FK_userentity_board"))
     private UserEntity userEntity;
+
+    public void visit(){
+        this.countBoardVisit += 1;
+    }
+
+    private Board(UserEntity userEntity, String boardTitle, String boardContent, String boardHashtag) {
+        this.userEntity = userEntity;
+        this.boardTitle = boardTitle;
+        this.boardContent = boardContent;
+        this.boardHashtag = boardHashtag;
+    }
+
+    public static Board of(UserEntity userEntity, String boardTitle, String boardContent, String boardHashtag) {
+        return new Board(userEntity, boardTitle, boardContent, boardHashtag);
+    }
 
     public void mapToUserEntity(UserEntity userEntity) {
         this.userEntity = userEntity;
         userEntity.mapToBoard(this);
     }
 
-    public void update(BoardDto boardDto){
+    public void update(BoardRequestDto boardDto) {
         this.boardTitle = boardDto.getBoardTitle();
         this.boardContent = boardDto.getBoardContent();
         this.boardHashtag = boardDto.getBoardHashtag();
