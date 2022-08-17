@@ -3,8 +3,10 @@ package com.sparta.doing.service;
 import com.sparta.doing.controller.dto.BoardDto;
 import com.sparta.doing.controller.requestdto.BoardRequestDto;
 import com.sparta.doing.entity.Board;
+import com.sparta.doing.entity.BoardLike;
 import com.sparta.doing.entity.UserEntity;
 import com.sparta.doing.entity.constant.SearchType;
+import com.sparta.doing.repository.BoardLikeRepository;
 import com.sparta.doing.repository.BoardRepository;
 import com.sparta.doing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +16,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Transactional
 @RequiredArgsConstructor
 @Service
 public class BoardService {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
+    private final BoardLikeRepository boardLikeRepository;
 
     @Transactional(readOnly = true)
     public Page<BoardDto> searchBoards(SearchType searchType, String searchKeyword, Pageable pageable) {
@@ -78,5 +83,39 @@ public class BoardService {
         if(foundBoardToDelete.getUserEntity().getUsername().equals(username)){
             boardRepository.delete(foundBoardToDelete);
         }
+    }
+
+    public void boardLike(Long boardId, String userId) {
+        Board foundBoardToLike = boardRepository.findById(boardId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글은 존재하지 않습니다."));
+        UserEntity foundUserEntity = userRepository.findByUsername(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("게시판 작성 권한이 없습니다."));
+
+        Optional<BoardLike> boardLikeFoundInRepo = boardLikeRepository.findByBoardAndUserEntity(foundBoardToLike, foundUserEntity);
+
+        boardLikeFoundInRepo.ifPresentOrElse(
+                boardLike -> {
+                    foundBoardToLike.discountLike(boardLike);
+                    foundBoardToLike.updateLikeCount();
+                    boardLikeRepository.delete(boardLike);
+                },
+                () -> {
+                    BoardLike boardLike = BoardLike.builder().build();
+                    boardLike.mapToBoard(foundBoardToLike);
+                    boardLike.mapToUserEntity(foundUserEntity);
+                    foundBoardToLike.updateLikeCount();
+                    boardLikeRepository.save(boardLike);
+                }
+        );
+//        if(boardLikeFoundInRepo.isPresent()){
+//            foundBoardToLike.discountLike(boardLikeFoundInRepo.get());
+//            foundBoardToLike.updateLikeCount();
+//            boardLikeRepository.delete(boardLikeFoundInRepo.get());
+//        } else {
+//            boardLike.mapToContent(foundBoardToLike);
+//            boardLike.mapToUser(foundUserEntity);
+//            foundBoardToLike.updateLikeCount();
+//            boardLikeRepository.save(boardLike);
+//        }
     }
 }

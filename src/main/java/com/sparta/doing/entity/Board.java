@@ -5,6 +5,9 @@ import lombok.*;
 
 import javax.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static javax.persistence.FetchType.LAZY;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -36,15 +39,20 @@ public class Board extends TimeStamp{
 //    private String boardThumbnail; // 게시판 썸네일
     private String boardHashtag; // 게시판 해시태그
 
-//    private Long boardLikeCount; // 게시판 좋아요 갯수
 //    private Long countPost; // 게시판에 딸려있는 게시글 수
 
     @Column(nullable = false)
     private int countBoardVisit = 0; // 게시판 방문자 수
 
-    @ManyToOne(fetch = LAZY)
+    @Column(nullable = false)
+    private int boardLikeCount = 0; // 게시판 좋아요 수
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "FK_userentity_board"))
     private UserEntity userEntity;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardLike> boardLikeList = new ArrayList<>();
 
     public void visit(){
         this.countBoardVisit += 1;
@@ -66,9 +74,19 @@ public class Board extends TimeStamp{
         userEntity.mapToBoard(this);
     }
 
+    public void mapToBoardLike(BoardLike boardLike) { boardLikeList.add(boardLike); }
+
     public void update(BoardRequestDto boardDto) {
         this.boardTitle = boardDto.getBoardTitle();
         this.boardContent = boardDto.getBoardContent();
         this.boardHashtag = boardDto.getBoardHashtag();
+    }
+
+    public void updateLikeCount() {
+        this.boardLikeCount = this.boardLikeList.size();
+    }
+
+    public void discountLike(BoardLike boardLike) {
+        this.boardLikeList.remove(boardLike);
     }
 }

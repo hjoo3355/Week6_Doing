@@ -25,7 +25,7 @@ import static lombok.AccessLevel.PROTECTED;
         })
 // @JsonPropertyOrder({"id", "username", "password", "email", "nickname",
 //         "authority", "createdAt", "modifiedAt"})
-@FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
+//@FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 @Getter
 public class UserEntity extends TimeStamp {
 
@@ -52,6 +52,9 @@ public class UserEntity extends TimeStamp {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boardList = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardLike> boardLikeList = new ArrayList<>();
 
     protected UserEntity() {
         this.username = null;
@@ -93,11 +96,17 @@ public class UserEntity extends TimeStamp {
                 .build();
     }
 
-//    public static UserEntity of(Long id, String username, String password, String email, String nickname, Authority authority) {
-//        return new UserEntity(id, username, password, email, nickname, authority);
-//    }
+    public UserEntity(Long id, String username, String password, String email, String nickname, Authority authority) {
+        super();
+    }
+
+    public static UserEntity of(Long id, String username, String password, String email, String nickname, Authority authority) {
+        return new UserEntity(id, username, password, email, nickname, authority);
+    }
 
     public void mapToBoard(Board board) { boardList.add(board); }
+
+    public void mapToBoardLike(BoardLike boardLike) { boardLikeList.add(boardLike); }
 
     @Override
     public boolean equals(Object object) {
