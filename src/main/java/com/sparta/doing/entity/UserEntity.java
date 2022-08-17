@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sparta.doing.controller.requestdto.SignUpDto;
 import com.sparta.doing.util.UserFunction;
 import com.sun.istack.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
@@ -53,6 +51,9 @@ public class UserEntity extends TimeStamp {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boardList = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardLike> boardLikeList = new ArrayList<>();
+
     protected UserEntity() {
         this.username = null;
         this.password = null;
@@ -95,6 +96,10 @@ public class UserEntity extends TimeStamp {
 
     public void mapToBoard(Board board) {
         boardList.add(board);
+    }
+
+    public void mapToBoardLike(BoardLike boardLike) {
+        boardLikeList.add(boardLike);
     }
 
     @Override

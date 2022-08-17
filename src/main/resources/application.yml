@@ -13,15 +13,16 @@ spring:
       settings:
         web-allow-others: true
   datasource:
-    #    driver-class-name: com.mysql.cj.jdbc.Driver
-    #    url: jdbc:mysql://<host_name>:3306/<database_name>
-    #    #    url: jdbc:h2:~/h2db/local
-    #    username: <user_id>
-    #    password: <password>
+    # In-Memory DB
     url: jdbc:h2:mem:testdb
+    #    url: jdbc:h2:~/h2db/local
     driver-class-name: org.h2.Driver
     username: sa
     password:
+#    url: jdbc:mysql://<host_name>:3306/<database_name>
+#    username: <user_id>
+#    password: <password>
+#    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate.ddl-auto: update
     open-in-view: false
