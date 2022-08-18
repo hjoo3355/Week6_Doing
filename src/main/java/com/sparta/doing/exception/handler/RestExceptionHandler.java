@@ -152,10 +152,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * 존재하지 않는 주소로 HTTP 요청을 보낼 때 발생
      *
-     * @param ex
-     * @param headers
-     * @param status
-     * @param request
+     * @param ex      NoHandlerFoundException
+     * @param headers HttpHeaders
+     * @param status  HttpStatus
+     * @param request WebRequest
      * @return the ApiError object
      */
     @Override
@@ -239,6 +239,20 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * DB에서 게시판 데이터를 찾을 수 없을 때 발생
+     *
+     * @param ex the Exception
+     * @return the ApiError object
+     */
+    @ExceptionHandler(BoardNotFoundException.class)
+    protected ResponseEntity<Object> handleBoardNotFound(BoardNotFoundException ex) {
+        ApiError apiError = new ApiError(NOT_FOUND);
+        apiError.setMessage(ex.getMessage());
+        apiError.setDebugMessage(ex.getMessage());
+        return buildResponseEntity(apiError);
+    }
+
+    /**
      * 로그인 하지 않은 상태로 로그아웃 등을 시도했을 때 발생
      *
      * @param ex the Exception
@@ -246,7 +260,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(NoLoggedInUserException.class)
     protected ResponseEntity<Object> handleNoLoggedInUser(NoLoggedInUserException ex) {
-        ApiError apiError = new ApiError(UNAUTHORIZED);
+        ApiError apiError = new ApiError(BAD_REQUEST);
         apiError.setMessage(ex.getMessage());
         apiError.setDebugMessage(ex.getMessage());
         return buildResponseEntity(apiError);

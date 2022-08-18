@@ -13,7 +13,7 @@ public enum ExceptionCode {
     WRONG_TOKEN("1004",
             "JWT claims is empty, 잘못된 JWT 토큰 입니다."),
     UNKNOWN_ERROR("1005", "Unknown error"),
-    ACCESS_DENIED("1006", "Access denied");
+    ACCESS_DENIED("1006", "접근 거부.");
 
     private final String code;
     private final String message;

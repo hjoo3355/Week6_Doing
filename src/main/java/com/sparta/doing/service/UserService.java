@@ -1,18 +1,20 @@
 package com.sparta.doing.service;
 
-import com.sparta.doing.controller.request.LoginDto;
-import com.sparta.doing.controller.request.SignUpDto;
-import com.sparta.doing.controller.request.TokenRequestDto;
-import com.sparta.doing.controller.response.TokenDto;
-import com.sparta.doing.controller.response.UserResponseDto;
+import com.sparta.doing.controller.requestdto.LoginDto;
+import com.sparta.doing.controller.requestdto.SignUpDto;
+import com.sparta.doing.controller.requestdto.TokenRequestDto;
+import com.sparta.doing.controller.responsedto.TokenDto;
+import com.sparta.doing.controller.responsedto.UserResponseDto;
 import com.sparta.doing.entity.RefreshToken;
 import com.sparta.doing.entity.UserEntity;
-import com.sparta.doing.exception.*;
+import com.sparta.doing.exception.DuplicateUserInfoException;
+import com.sparta.doing.exception.ExceptionCode;
+import com.sparta.doing.exception.InvalidJWTException;
+import com.sparta.doing.exception.RefreshTokenNotFoundException;
 import com.sparta.doing.jwt.TokenProvider;
 import com.sparta.doing.repository.RefreshTokenRepository;
 import com.sparta.doing.repository.UserRepository;
 import com.sparta.doing.util.SecurityUtil;
-import com.sparta.doing.util.UserFunction;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -70,27 +72,33 @@ public class UserService {
 
         // 2. 실제로 검증 (사용자 비밀번호 체크) 이 이루어지는 부분
         //    authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
-        Authentication authentication = null;
+        Authentication authentication;
         try {
             authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-
         } catch (AuthenticationException e) {
             log.info("아이디, 혹은 비밀번호가 잘못되었습니다.");
             throw new BadCredentialsException("아이디, 혹은 비밀번호가 잘못되었습니다.");
         }
 
-        // 3. 인증 정보를 기반으로 JWT 토큰 생성
-        TokenDto tokenDto = tokenProvider.createTokenDto(authentication);
+        // 3. 검증이 끝나면 해당 정보로 db에서 UserEntity를 검색
+        var userId = Long.valueOf(authentication.getName());
+        var userEntity = userRepository.findById(userId)
+                .orElseThrow(
+                        () -> new UsernameNotFoundException("userId: " + userId +
+                                "는 존재하지 않는 회원입니다."));
 
-        // 4. RefreshToken 저장
+        // 4. 인증 정보와 PK값을 넣고 JWT 토큰 생성
+        TokenDto tokenDto = tokenProvider.createTokenDto(authentication, userId);
+
+        // 5. RefreshToken 저장
         RefreshToken refreshToken = RefreshToken.builder()
-                .key(authentication.getName())
+                .key(userId)
                 .value(tokenDto.getRefreshToken())
                 .build();
 
         refreshTokenRepository.save(refreshToken);
 
-        // 5. 토큰 발급
+        // 6. 토큰 발급
         return tokenDto;
     }
 
@@ -114,24 +122,32 @@ public class UserService {
         } catch (IllegalArgumentException e) {
             log.info(ExceptionCode.WRONG_TOKEN.getMessage());
             throw new InvalidJWTException(ExceptionCode.WRONG_TOKEN.getMessage());
+        } catch (Exception e) {
+            log.info("{");
+            log.info("Exception Message : {}", e.getMessage());
+            log.info("Exception StackTrace : {");
+            e.printStackTrace();
+            log.info("}");
+            log.info("================================================");
+            throw new InvalidJWTException(ExceptionCode.UNKNOWN_ERROR.getMessage());
         }
 
-        // 2. Access Token 에서 User ID(username) 가져오기
+        // 2. Access Token 에서 userId(PK) 가져오기
         Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
+        var userId = Long.parseLong(authentication.getName());
 
-        // 3. 리프레쉬 토큰 저장소에서 User ID(username) 를 기반으로 토큰 가져옴
-        RefreshToken refreshToken = refreshTokenRepository.findByKey(authentication.getName())
+        // 3. 리프레쉬 토큰 저장소에서 userId(PK) 를 기반으로 토큰 가져옴
+        RefreshToken refreshToken = refreshTokenRepository.findById(userId)
                 .orElseThrow(() ->
                         new RefreshTokenNotFoundException("로그아웃 된 사용자입니다."));
 
         // 4. Refresh Token 일치하는지 검사
         if (!refreshToken.getValue().equals(tokenRequestDto.getRefreshToken())) {
-            throw new InvalidJWTException(
-                    UserFunction.getClassName() + "토큰의 유저 정보가 일치하지 않습니다.");
+            throw new InvalidJWTException("토큰의 유저 정보가 일치하지 않습니다.");
         }
 
-        // 5. 일치하면 새로운 토큰 생성
-        TokenDto tokenDto = tokenProvider.createTokenDto(authentication);
+        // 5. Access Token 에서 가져온 userId(PK)를 다시 새로운 토큰의 클레임에 넣고 토큰 생성
+        TokenDto tokenDto = tokenProvider.createTokenDto(authentication, userId);
 
         // 6. db의 리프레쉬 토큰 정보 업데이트
         RefreshToken newRefreshToken =
@@ -143,36 +159,27 @@ public class UserService {
     }
 
     @Transactional
-    public String logout() {
-        var username = SecurityUtil.getCurrentUsername()
-                .orElseThrow(() -> new NoLoggedInUserException(
-                        UserFunction.getClassName() +
-                                "SecurityContextHolder에 로그인 유저 정보가 없습니다."));
-        if (username.equals("anonymousUser")) {
-            log.info("username == anonymousUser. 로그인 하지 않았습니다.");
-            throw new NoLoggedInUserException(
-                    "username == anonymousUser. 로그인 하지 않았습니다.");
-        }
-        var token = refreshTokenRepository.findByKey(username)
+    public TokenDto logout() {
+        var userId = SecurityUtil.getCurrentUserIdByLong();
+        var token = refreshTokenRepository.findById(userId)
                 .orElseThrow(() -> new RefreshTokenNotFoundException(
-                        UserFunction.getClassName() +
-                                "사용자 " + username + "의 리프레쉬 토큰을 찾을 수 없습니다.")
+                        "userId: " + userId + "의 리프레쉬 토큰을 찾을 수 없습니다.")
                 );
 
         refreshTokenRepository.delete(token);
 
-        return "로그아웃 성공.";
+        return tokenProvider.createEmptyTokenDto();
     }
 
     // 현재 SecurityContext에 있는 유저 정보 가져오기
     @Transactional(readOnly = true)
     public UserResponseDto getMyUserInfoWithAuthorities() {
-        return UserResponseDto.of(
-                SecurityUtil.getCurrentUsername()
-                        .flatMap(userRepository::findByUsername)
+        var userEntity =
+                userRepository.findById(SecurityUtil.getCurrentUserIdByLong())
                         .orElseThrow(
-                                () -> new UsernameNotFoundException("로그인 유저 정보가 없습니다."))
-        );
+                                () -> new UsernameNotFoundException("로그인 유저 정보가 없습니다."));
+
+        return UserResponseDto.of(userEntity);
     }
 
     @Transactional(readOnly = true)

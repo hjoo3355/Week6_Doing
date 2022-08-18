@@ -1,6 +1,7 @@
 package com.sparta.doing.jwt;
 
-import com.sparta.doing.controller.response.TokenDto;
+import com.sparta.doing.controller.responsedto.TokenDto;
+import com.sparta.doing.security.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -14,7 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -29,9 +29,9 @@ public class TokenProvider {
 
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "bearer";
+    private static final String USER_ID = "uid";
     private final long ACCESS_TOKEN_LIFETIME_IN_MS;
     private final long REFRESH_TOKEN_LIFETIME_IN_MS;
-    // private final String secretKey;
     private final Key key;
 
     public long getACCESS_TOKEN_LIFETIME_IN_MS() {
@@ -47,7 +47,6 @@ public class TokenProvider {
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.access-token-lifetime-in-seconds}") long accessTokenLifetimeInSeconds,
             @Value("${jwt.refresh-token-lifetime-in-seconds}") long refreshTokenLifetimeInSeconds) {
-        // this.secretKey = secretKey;
 
         // second -> millisecond로 변환
         this.ACCESS_TOKEN_LIFETIME_IN_MS =
@@ -62,7 +61,7 @@ public class TokenProvider {
     }
 
     // 토큰 생성
-    public TokenDto createTokenDto(Authentication authentication) {
+    public TokenDto createTokenDto(Authentication authentication, Long userId) {
         // 권한 가져오기
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -77,7 +76,9 @@ public class TokenProvider {
         // 액세스 토큰 생성
         var accessToken = Jwts.builder()
                 // payload "sub": "name"
-                .setSubject(authentication.getName())
+                .setSubject("Access Token")
+                // 클레임에 userId(PK) 저장
+                .claim(USER_ID, userId)
                 // payload "auth": "ROLE_USER"
                 .claim(AUTHORITIES_KEY, authorities)
                 // payload "exp": accessTokenLifetimeInSeconds * 1000
@@ -88,6 +89,7 @@ public class TokenProvider {
 
         // 리프레쉬 토큰 생성
         var refreshToken = Jwts.builder()
+                .setSubject("Refresh Token")
                 .setExpiration(refreshTokenExpiration)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
@@ -98,6 +100,16 @@ public class TokenProvider {
                 .accessTokenLifetime(this.ACCESS_TOKEN_LIFETIME_IN_MS)
                 .refreshToken(refreshToken)
                 .refreshTokenLifetime(this.REFRESH_TOKEN_LIFETIME_IN_MS)
+                .build();
+    }
+
+    public TokenDto createEmptyTokenDto() {
+        return TokenDto.builder()
+                .grantType(BEARER_TYPE)
+                .accessToken("logout")
+                .accessTokenLifetime(1L)
+                .refreshToken("logout")
+                .refreshTokenLifetime(1L)
                 .build();
     }
 
@@ -116,7 +128,10 @@ public class TokenProvider {
                         .collect(Collectors.toList());
 
         // User 객체를 생성해서 Authentication 반환
-        User principal = new User(claims.getSubject(), "", authorities);
+        long userId = (int) claims.get(USER_ID);
+        CustomUserDetails principal =
+                new CustomUserDetails(
+                        String.valueOf(userId), "", String.valueOf(userId), authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, accessToken, authorities);
     }
@@ -125,27 +140,9 @@ public class TokenProvider {
     public boolean validateToken(String token) {
         Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
         return true;
-        // try {
-        //     Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-        //     return true;
-        // } catch (SecurityException | MalformedJwtException e) {
-        //     log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
-        //     throw new MalformedJwtException(e.getMessage(), e);
-        // } catch (ExpiredJwtException e) {
-        //     log.info("Expired JWT token, 만료된 JWT token 입니다.");
-        //     throw new ExpiredJwtException(
-        //             e.getHeader(), e.getClaims(), e.getMessage());
-        // } catch (UnsupportedJwtException e) {
-        //     log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
-        //     throw new UnsupportedJwtException(e.getMessage(), e);
-        // } catch (IllegalArgumentException e) {
-        //     log.info("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
-        //     throw new IllegalArgumentException(e.getMessage(), e);
-        // }
-
-        // return false;
     }
 
+    // 토큰 복호화
     private Claims parseClaims(String accessToken) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();

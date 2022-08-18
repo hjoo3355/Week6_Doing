@@ -1,6 +1,6 @@
 package com.sparta.doing.controller;
 
-import com.sparta.doing.controller.response.UserResponseDto;
+import com.sparta.doing.controller.responsedto.UserResponseDto;
 import com.sparta.doing.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -42,13 +42,18 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         // 지원되지 않는 토큰인 경우
         else if (exception.equals(ExceptionCode.UNSUPPORTED_TOKEN.getCode())) {
             setResponse(response, ExceptionCode.UNSUPPORTED_TOKEN);
+        }
+        // 토큰이 없거나 이상한 값이 들어온 경우
+        else if (exception.equals(ExceptionCode.WRONG_TOKEN.getCode())) {
+            setResponse(response, ExceptionCode.WRONG_TOKEN);
         } else {
             setResponse(response, ExceptionCode.ACCESS_DENIED);
         }
     }
 
     // 한글 출력을 위해 getWriter() 사용
-    private void setResponse(HttpServletResponse response, ExceptionCode exceptionCode) throws IOException {
+    private void setResponse(HttpServletResponse response,
+                             ExceptionCode exceptionCode) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
@@ -59,17 +64,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         responseJson.put("message", exceptionCode.getMessage());
 
         response.getWriter().print(responseJson);
-
-        // JSONObject errorDetails = new JSONObject();
-        // errorDetails.put("status", HttpStatus.UNAUTHORIZED);
-        // errorDetails.put("timestamp",
-        //         LocalDateTime.now().format(
-        //                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        // errorDetails.put("message", exceptionCode.getMessage());
-        // errorDetails.put("debugMessage", exceptionCode.getMessage());
-        // errorDetails.put("subErrors", "null");
-        // JSONObject error = new JSONObject();
-        // error.put("ApiError", errorDetails);
     }
 
     private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {

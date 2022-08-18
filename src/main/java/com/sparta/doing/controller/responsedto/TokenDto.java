@@ -1,4 +1,4 @@
-package com.sparta.doing.controller.response;
+package com.sparta.doing.controller.responsedto;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.jackson.Jacksonized;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,13 +23,13 @@ public class TokenDto {
     String accessToken;
     @NotBlank
     String refreshToken;
-    @NotBlank
+    @NotNull
     Long accessTokenLifetimeInMs;
     @NotBlank
     String accessTokenLifetime;
     @NotBlank
     String accessTokenExpireDate;
-    @NotBlank
+    @NotNull
     Long refreshTokenLifetimeInMs;
     @NotBlank
     String refreshTokenLifetime;

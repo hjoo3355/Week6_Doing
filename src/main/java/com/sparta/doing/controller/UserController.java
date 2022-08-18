@@ -1,10 +1,10 @@
 package com.sparta.doing.controller;
 
-import com.sparta.doing.controller.request.LoginDto;
-import com.sparta.doing.controller.request.SignUpDto;
-import com.sparta.doing.controller.request.TokenRequestDto;
-import com.sparta.doing.controller.response.TokenDto;
-import com.sparta.doing.controller.response.UserResponseDto;
+import com.sparta.doing.controller.requestdto.LoginDto;
+import com.sparta.doing.controller.requestdto.SignUpDto;
+import com.sparta.doing.controller.requestdto.TokenRequestDto;
+import com.sparta.doing.controller.responsedto.TokenDto;
+import com.sparta.doing.controller.responsedto.UserResponseDto;
 import com.sparta.doing.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -91,7 +91,7 @@ public class UserController {
 
     // 로그아웃
     @GetMapping("/logout")
-    public ResponseEntity<String> logout() {
+    public ResponseEntity<TokenDto> logout() {
         return ResponseEntity.ok(userService.logout());
     }
 
